@@ -1,0 +1,86 @@
+bot:
+  bottoken: mainbot token. 
+  guildid: '1388594405581131918'
+  prefix: '='
+database:
+  host: localhost
+  port: 5432
+  username: dbuser
+  password: dbpassword
+  db_name: ranked_bedwars
+
+categories:
+  gamestextcategory: 1388597956760043690
+  gamesvoicecategory: 1388597964045418528
+  screenshare: 1396180474732482603
+channels:
+  alerts: 1388598493269983464
+  games: 1388598483300126840
+  punishments: 1388598501679697920
+  queueping: 1375102669135544381
+  scoring: 1396160386956263435
+  screenshare: 1388598510806634666
+  strikerequest: 1396180927515721728
+  transcripts: 1396181090741260520
+  voidrequest: 1396181154075377805
+  waitingvc: 1388599836802154556
+  commandschannel: 1388598380015521862
+elo_decay:
+  decay_threshold: 1000
+  decay_value: 30
+  enabled: true
+logging:
+  startup: 1400505268768342066
+  error: 1400504351017013428
+  modification: 1400505336405823640
+  scoring: 1388599176329433108
+  voiding: 1400505765692833924
+  regandrename: 1400508734492639273
+#add as much as you want, its the id of channel where commmands are blocked.
+commandsblocked: 
+  - '1399861568879071356'  
+party:
+  partyenabled: true
+  partyqueuesize: 4
+  partysize: 2
+queue_processor:
+  batch_size: 100
+  continuous_check_interval: 5.0
+  min_players_for_partial_game: 4
+  partial_batch_wait_time: 60.0
+  processing_cooldown: 2.0
+
+websocket:
+  enabled: true                   # Enable/disable WebSocket system
+  host: '0.0.0.0'                 # Host to bind to (0.0.0.0 = all interfaces, localhost = local only)
+  port: 25513                      # WebSocket server port
+  path: '/rbw/websocket'          # WebSocket server path
+  timeout: 60                     # Request timeout in seconds
+  max_retry_attempts: 3           # Maximum warp retry attempts
+  queue_broadcast_interval: 1.0   # Queue status broadcast interval
+
+workers:
+  enabled: true
+  tokens:
+    - 'tokens'
+    - 'add as much as u like!'
+    - 'made by deyo, discord: loqkey'
+
+roles:
+  frozen: 1388597541855301734
+  queueping: 1375102051238940697
+  rankedban: 1388597563971604631
+  rankedmuted: 1388597538139013264
+  registered: 1388597786630553761
+  scorer: 1388597349277892658
+  screensharer: 1388597256155959398
+  unregistered: 1396175638460760214 
+server:
+  invitelink: discord.gg/bmcrbw
+  serverip: blocksmc.com
+  servername: BlocksMC Ranked BedWars
+strikes:
+  1strike: warn
+  2strike: 2h
+  3strike: 6h
+  4strike: 16h

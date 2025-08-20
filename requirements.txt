@@ -1,0 +1,16 @@
+discord.py
+asyncpg
+PyYAML
+flask[async]
+aiohttp
+pymongo
+chat-exporter
+psutil
+nest_asyncio
+requests
+pillow
+pika
+matplotlib
+mplcyberpunk
+websockets
+jsonschema

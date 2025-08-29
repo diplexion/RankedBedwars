@@ -81,15 +81,24 @@ class DatabaseManager:
                     db_name = db_cfg.get('db_name', 'ranked_bedwars')
                     self.db_name = db_name
                     
-                    uri = f"mongodb://{username}:{password}@{host}:{port}/?authSource=admin"
-                    self.client = MongoClient(
-                        uri,
-                        serverSelectionTimeoutMS=5000,
-                        connectTimeoutMS=5000,
-                        socketTimeoutMS=5000,
-                        maxPoolSize=50,
-                        retryWrites=True
-                    )
+                    if host in ("localhost"):
+                        self.client = MongoClient(
+                            serverSelectionTimeoutMS=5000,
+                            connectTimeoutMS=5000,
+                            socketTimeoutMS=5000,
+                            maxPoolSize=50,
+                            retryWrites=True
+                        )
+                    else:
+                        uri = f"mongodb://{username}:{password}@{host}:{port}/?authSource=admin"
+                        self.client = MongoClient(
+                            uri,
+                            serverSelectionTimeoutMS=5000,
+                            connectTimeoutMS=5000,
+                            socketTimeoutMS=5000,
+                            maxPoolSize=50,
+                            retryWrites=True
+                        )
                     
                     
                     self.client.admin.command('ping')

@@ -21,6 +21,7 @@ class MessageType:
     WARP_FAILED_ARENA = "warp_failed_arena_not_found"
     WARP_FAILED_OFFLINE = "warp_failed_offline_players"
     RETRY_GAME = "retrygame"
+    AUTO_RETRY_FROM_INGAME = "autoretrygamefromingame"
     
     
     SCORING = "scoring"
@@ -270,6 +271,20 @@ class MessageSchemas:
         },
         "required": ["type", "game_id"]
     }
+
+    # Accepts either game_id or gameid to be lenient with client payloads
+    AUTO_RETRY_FROM_INGAME = {
+        "type": "object",
+        "properties": {
+            "type": {"type": "string", "const": MessageType.AUTO_RETRY_FROM_INGAME},
+            "game_id": {"type": "string"},
+            "gameid": {"type": "string"}
+        },
+        "oneOf": [
+            {"required": ["type", "game_id"]},
+            {"required": ["type", "gameid"]}
+        ]
+    }
     
     QUEUE_STATUS = {
         "type": "object",
@@ -410,6 +425,7 @@ class MessageValidator:
             MessageType.WARP_FAILED_ARENA: MessageSchemas.WARP_FAILED_ARENA,
             MessageType.WARP_FAILED_OFFLINE: MessageSchemas.WARP_FAILED_OFFLINE,
             MessageType.RETRY_GAME: MessageSchemas.RETRY_GAME,
+            MessageType.AUTO_RETRY_FROM_INGAME: MessageSchemas.AUTO_RETRY_FROM_INGAME,
             MessageType.QUEUE_STATUS: MessageSchemas.QUEUE_STATUS,
             MessageType.VERIFICATION: MessageSchemas.VERIFICATION,
             MessageType.QUEUE_JOIN_SUCCESS: MessageSchemas.QUEUE_JOIN_SUCCESS,

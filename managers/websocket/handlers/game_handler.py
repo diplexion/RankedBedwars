@@ -34,6 +34,7 @@ class GameHandler:
         self.ws_manager.register_handler(MessageType.WARP_FAILED_ARENA, self.handle_warp_failed_arena)
         self.ws_manager.register_handler(MessageType.WARP_FAILED_OFFLINE, self.handle_warp_failed_offline)
         self.ws_manager.register_handler(MessageType.RETRY_GAME, self.handle_retry_game)
+        self.ws_manager.register_handler(MessageType.AUTO_RETRY_FROM_INGAME, self.handle_auto_retry_from_ingame)
         
         self.logger.debug("GameHandler message handlers registered")
     
@@ -192,6 +193,19 @@ class GameHandler:
             
         except Exception as e:
             self.logger.error(f"Error handling retry game: {e}")
+            await self.ws_manager.error_handler.handle_message_error(websocket, str(message), e)
+
+    async def handle_auto_retry_from_ingame(self, message: Dict[str, Any], websocket) -> None:
+        try:
+            game_id = message.get('game_id') or message.get('gameid')
+            if not game_id:
+                self.logger.error("Auto-retry message missing game_id/gameid")
+                return
+            self.logger.info(f"Received auto-retry-from-ingame for game {game_id}")
+
+            await self._notify_autoretry(game_id)
+        except Exception as e:
+            self.logger.error(f"Error handling auto-retry-from-ingame: {e}")
             await self.ws_manager.error_handler.handle_message_error(websocket, str(message), e)
     
     async def _handle_successful_warp(self, game_id: str) -> None:
@@ -393,6 +407,27 @@ class GameHandler:
             
         except Exception as e:
             self.logger.error(f"Error notifying game started for {game_id}: {e}")
+
+    async def _notify_autoretry(self, game_id: str) -> None:
+        try:
+            # Resolve text channel for the game and send a message
+            db = self.bot.database_manager
+            game_channel = db.find_one('gameschannels', {'gameid': game_id})
+            if not game_channel:
+                self.logger.debug(f"No gameschannels record for {game_id}")
+                return
+            text_channel_id = game_channel.get('textchannelid')
+            if not text_channel_id:
+                self.logger.debug(f"No textchannelid for game {game_id}")
+                return
+            text_channel = self.bot.get_channel(int(text_channel_id))
+            if not text_channel:
+                self.logger.debug(f"Text channel not found for id {text_channel_id}")
+                return
+
+            await text_channel.send(f"🔁 Retrying game `{game_id}`... Please wait while we re-warp players.")
+        except Exception as e:
+            self.logger.error(f"Failed to notify auto-retry for {game_id}: {e}")
     
     async def _notify_game_failed(self, game_id: str, reason: str, team_data: Dict[str, Any], pending_warp: Dict[str, Any]) -> None:
         try:

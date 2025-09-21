@@ -228,6 +228,7 @@ class DatabaseManager:
                         'bedbreakers': {'bsonType': 'array', 'items': {'bsonType': 'string'}},
                         'state': {'bsonType': 'string', 'enum': ['pending', 'voided', 'scored', 'unknown','submitted']},
                         'gametype': {'bsonType': 'string'},
+                        'map': {'bsonType': 'string'},
                         'date': {'bsonType': 'timestamp'},
                         'start_time': {'bsonType': 'timestamp'},
                         'end_time': {'bsonType': 'timestamp'}

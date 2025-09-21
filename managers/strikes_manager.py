@@ -130,9 +130,9 @@ class StrikesManager:
                     
                     update_data = {
                         'strikes_count': 0,
-                        'latest_strike_date': None,
-                        'latest_strike_reason': None,
-                        'latest_strike_staff': None
+                        'latest_strike_date': Timestamp(0, 1),
+                        'latest_strike_reason': '',
+                        'latest_strike_staff': ''
                     }
                     self.db_manager.update_one('users', {'discordid': user['discordid']}, {'$set': update_data})
                     print(f"Removed strikes for user {user['discordid']}")

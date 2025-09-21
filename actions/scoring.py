@@ -78,6 +78,7 @@ async def scoring(bot, gameid, winningteamnumber, mvp_ids, bedbreaker_ids=None, 
                     color=discord.Color.blue()
                 )
                 embed.add_field(name="Game ID", value=f"`{gameid}`", inline=True)
+                embed.add_field(name="Map", value=f"{game.get('map', 'unknown')}", inline=True)
                 embed.add_field(name="State", value=f"{game.get('state', 'unknown')}", inline=True)
                 embed.add_field(name="Winning Team", value=(', '.join([f'<@{pid}>' for pid in (team1_ids if winningteamnumber == 1 else team2_ids)]) or 'None'), inline=False)
                 embed.add_field(name="Losing Team", value=(', '.join([f'<@{pid}>' for pid in (team2_ids if winningteamnumber == 1 else team1_ids)]) or 'None'), inline=False)

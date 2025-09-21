@@ -411,6 +411,7 @@ class QueueProcessor:
                 'team2': [str(player_id) for player_id in team2],  
                 'state': 'pending',
                 'gametype': queue_settings.get('gametype', 'unknown'),
+                'map': 'random',  
                 'date': current_timestamp,  
                 'start_time': current_timestamp,  
                 'end_time': current_timestamp  
@@ -733,9 +734,13 @@ class QueueProcessor:
             team1_mentions = '\n'.join(f'- <@{player_id}>' for player_id in team1)
             team2_mentions = '\n'.join(f'- <@{player_id}>' for player_id in team2)
 
+            game_data = self.db_manager.find_one('games', {'gameid': game_id})
+            map_name = game_data.get('map', 'random') if game_data else 'random'
+
             embed = self.embed_builder.build_info(
                 title=f"Game {game_id}",
                 description=(
+                    f"**Map:** {map_name}\n\n"
                     f"**Team 1**\n{team1_mentions}\n\n"
                     f"**Team 2**\n{team2_mentions}"
                 )

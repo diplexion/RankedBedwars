@@ -1,6 +1,7 @@
 
 import asyncio
 import logging
+import discord
 from typing import Dict, Any, Optional, List, Tuple
 from ..models.messages import MessageType, MessageBuilder
 from ..utils.error_handler import WebSocketErrorHandler
@@ -115,18 +116,45 @@ class GameHandler:
     async def handle_warp_success(self, message: Dict[str, Any], websocket) -> None:
         try:
             game_id = message.get('game_id')
+            map_name = message.get('map')
+            
             if not game_id:
                 self.logger.error("Warp success message missing game_id")
                 return
             
-            self.logger.info(f"Received warp success for game {game_id}")
+            self.logger.info(f"Received warp success for game {game_id} on map {map_name}")
             
+            if map_name:
+                await self._update_game_map(game_id, map_name)
             
-            await self._handle_successful_warp(game_id)
+            await self._handle_successful_warp(game_id, map_name)
             
         except Exception as e:
             self.logger.error(f"Error handling warp success: {e}")
             await self.ws_manager.error_handler.handle_message_error(websocket, str(message), e)
+    
+    async def _update_game_map(self, game_id: str, map_name: str) -> None:
+        """Update the database with the actual map name for the game"""
+        try:
+            from managers.database_manager import DatabaseManager
+            db_manager = DatabaseManager()
+            
+            db_manager.update_one(
+                'games', 
+                {'gameid': game_id}, 
+                {'$set': {'map': map_name}}
+            )
+            
+            db_manager.update_one(
+                'recentgames', 
+                {'gameid': game_id}, 
+                {'$set': {'map': map_name}}
+            )
+            
+            self.logger.info(f"Updated game {game_id} with map: {map_name}")
+            
+        except Exception as e:
+            self.logger.error(f"Error updating game map for {game_id}: {e}")
     
     async def handle_warp_failed_arena(self, message: Dict[str, Any], websocket) -> None:
         try:
@@ -208,7 +236,7 @@ class GameHandler:
             self.logger.error(f"Error handling auto-retry-from-ingame: {e}")
             await self.ws_manager.error_handler.handle_message_error(websocket, str(message), e)
     
-    async def _handle_successful_warp(self, game_id: str) -> None:
+    async def _handle_successful_warp(self, game_id: str, map_name: str) -> None:
         try:
             self.logger.info(f"Processing successful warp for game {game_id}")
             
@@ -221,7 +249,7 @@ class GameHandler:
             
             
             
-            await self._notify_game_started(game_id, team_data, pending_warp)
+            await self._notify_game_started(game_id, team_data, pending_warp, map_name)
             
             
             await self._cleanup_warp_data(game_id)
@@ -385,7 +413,7 @@ class GameHandler:
         except Exception as e:
             self.logger.error(f"Error cleaning up warp data for game {game_id}: {e}")
     
-    async def _notify_game_started(self, game_id: str, team_data: Dict[str, Any], pending_warp: Dict[str, Any]) -> None:
+    async def _notify_game_started(self, game_id: str, team_data: Dict[str, Any], pending_warp: Dict[str, Any], map_name: str) -> None:
         try:
             
             
@@ -398,7 +426,7 @@ class GameHandler:
                 f"- Team1: {', '.join(team1_igns)} vs Team2: {', '.join(team2_igns)}"
             )
             
-            
+            await self._send_game_started_embed(game_id, map_name, team1_igns, team2_igns)
             
             
             
@@ -407,6 +435,33 @@ class GameHandler:
             
         except Exception as e:
             self.logger.error(f"Error notifying game started for {game_id}: {e}")
+
+    async def _send_game_started_embed(self, game_id: str, map_name: str, team1_igns: List[str], team2_igns: List[str]) -> None:
+        try:
+            game = self.bot.database_manager.find_one('games', {'gameid': game_id})
+            if not game:
+                self.logger.error(f"No game found for {game_id}")
+                return
+            game_channel = self.bot.database_manager.find_one('gameschannels', {'gameid': game_id})
+            if not game_channel:
+                self.logger.error(f"No gameschannels record for {game_id}")
+                return
+            text_channel_id = game_channel.get('textchannelid')
+            if not text_channel_id:
+                self.logger.error(f"No textchannelid for game {game_id}")
+                return
+            text_channel = self.bot.get_channel(int(text_channel_id))
+            if not text_channel:
+                self.logger.error(f"Text channel not found for id {text_channel_id}")
+                return
+            embed = discord.Embed(
+                title=f"Game {game_id} Started",
+                description=f"Game {game_id} started on map {map_name} with teams {team1_igns} and {team2_igns}",
+                color=discord.Color.green()
+            )
+            await text_channel.send(embed=embed)
+        except Exception as e:
+            self.logger.error(f"Error sending game started embed for {game_id}: {e}")
 
     async def _notify_autoretry(self, game_id: str) -> None:
         try:
@@ -425,7 +480,7 @@ class GameHandler:
                 self.logger.debug(f"Text channel not found for id {text_channel_id}")
                 return
 
-            await text_channel.send(f"🔁 Retrying game `{game_id}`... Please wait while we re-warp players.")
+            await text_channel.send(f"Retrying game `{game_id}`... Please wait while we re-warp players.")
         except Exception as e:
             self.logger.error(f"Failed to notify auto-retry for {game_id}: {e}")
     

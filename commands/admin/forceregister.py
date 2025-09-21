@@ -4,6 +4,7 @@ from managers.database_manager import DatabaseManager
 from managers.permission_manager import PermissionManager
 from utils.embed_builder import EmbedBuilder
 from actions.fix import fix
+from bson.timestamp import Timestamp
 
 class ForceRegister(commands.Cog):
     def __init__(self, bot):
@@ -55,6 +56,10 @@ class ForceRegister(commands.Cog):
                 'scored': 0,
                 'voided': 0,
                 'gamesplayed': 0,
+                'strikes_count': 0,
+                'latest_strike_date': Timestamp(0, 1),
+                'latest_strike_reason': '',
+                'latest_strike_staff': '',
             })
 
             self.db_manager.insert('settings', {

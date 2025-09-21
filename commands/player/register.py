@@ -8,6 +8,7 @@ import os
 import random
 import string
 import asyncio
+from bson.timestamp import Timestamp
 
 from managers.permission_manager import PermissionManager
 from utils.embed_builder import EmbedBuilder
@@ -279,6 +280,10 @@ class RegisterCommands(commands.Cog):
                 'scored': 0,
                 'voided': 0,
                 'gamesplayed': 0,
+                'strikes_count': 0,
+                'latest_strike_date': Timestamp(0, 1),
+                'latest_strike_reason': '',
+                'latest_strike_staff': '',
             }
 
             self.bot.database_manager.insert('users', document)

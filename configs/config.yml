@@ -1,14 +1,15 @@
 bot:
-  bottoken: mainbot token. 
+  bottoken: MTMzNjY3NDU5NzU3OTUyMjEzMQ.GrtHdI.5y93elBexrEnHi3dUMGLXCTAOhkg9xsCImrM_Q
   guildid: '1388594405581131918'
   prefix: '='
+
+
 database:
   host: localhost
   port: 5432
   username: dbuser
   password: dbpassword
   db_name: ranked_bedwars
-
 categories:
   gamestextcategory: 1388597956760043690
   gamesvoicecategory: 1388597964045418528
@@ -36,7 +37,7 @@ logging:
   scoring: 1388599176329433108
   voiding: 1400505765692833924
   regandrename: 1400508734492639273
-#add as much as you want, its the id of channel where commmands are blocked.
+#add as much as you want
 commandsblocked: 
   - '1399861568879071356'  
 party:
@@ -62,9 +63,9 @@ websocket:
 workers:
   enabled: true
   tokens:
-    - 'tokens'
-    - 'add as much as u like!'
-    - 'made by deyo, discord: loqkey'
+    - 'MTQwMDUwNzkyMjU0MjQ5MzgyNg.GhXnUT.Cdlve8cS8Umb-lsWaFcutlsy-mOhCuVJCoEI5c'
+    - 'MTQwMDUwODE3MDM3OTU5MTgyMQ.G6NZke.76SZ8GC-x6gdcqeRYoeMar293xzlffvnMlBdqE'
+    - 'MTQwMDUwODI4OTM4NDcxNDQwMw.Gs9-uG.KPFGHQswMLbK-gYpPMPxxD6XXO5ttiPxDtK60o'
 
 roles:
   frozen: 1388597541855301734

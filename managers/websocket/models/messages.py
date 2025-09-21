@@ -7,46 +7,46 @@ from jsonschema import validate, ValidationError, Draft7Validator
 class MessageType:
     
     
-    CHECK_PLAYER = "check_player"
-    PLAYER_STATUS = "player_status"
-    VERIFICATION = "verification"
+    CHECK_PLAYER = "CHECK_PLAYER"
+    PLAYER_STATUS = "PLAYER_STATUS"
+    VERIFICATION = "VERIFICATION"
     
     
-    QUEUE_FROM_INGAME = "queuefromingame"
-    QUEUE_STATUS = "queuestatus"
+    QUEUE_FROM_INGAME = "QUEUEFROMINGAME"
+    QUEUE_STATUS = "QUEUESTATUS"
     
     
-    WARP_PLAYERS = "warp_players"
-    WARP_SUCCESS = "warp_success"
-    WARP_FAILED_ARENA = "warp_failed_arena_not_found"
-    WARP_FAILED_OFFLINE = "warp_failed_offline_players"
-    RETRY_GAME = "retrygame"
-    AUTO_RETRY_FROM_INGAME = "autoretrygamefromingame"
+    WARP_PLAYERS = "WARP_PLAYERS"
+    WARP_SUCCESS = "WARP_SUCCESS"
+    WARP_FAILED_ARENA = "WARP_FAILED_ARENA_NOT_FOUND"
+    WARP_FAILED_OFFLINE = "WARP_FAILED_OFFLINE_PLAYERS"
+    RETRY_GAME = "RETRYGAME"
+    AUTO_RETRY_FROM_INGAME = "AUTORETRYGAMEFROMINGAME"
     
     
-    SCORING = "scoring"
-    VOIDING = "voiding"
+    SCORING = "SCORING"
+    VOIDING = "VOIDING"
     
     
-    CALL_CMD = "callcmd"
-    CALL_SUCCESS = "callsuccess"
-    CALL_FAILURE = "callfailure"
+    CALL_CMD = "CALL_CMD"
+    CALL_SUCCESS = "CALL_SUCCESS"
+    CALL_FAILURE = "CALL_FAILURE"
     
     
-    AUTO_SS = "autoss"
-    SCREENSHARE_DONTLOG = "screensharedontlog"
-    AUTOSS_SUCCESS = "autoss_success"
-    AUTOSS_ERROR = "autoss_error"
-    SCREENSHAREDONTLOG_SUCCESS = "screensharedontlog_success"
-    SCREENSHAREDONTLOG_ERROR = "screensharedontlog_error"
+    AUTO_SS = "AUTOSS"
+    SCREENSHARE_DONTLOG = "SCREENSHAREDONTLOG"
+    AUTOSS_SUCCESS = "AUTOSS_SUCCESS"
+    AUTOSS_ERROR = "AUTOSS_ERROR"
+    SCREENSHAREDONTLOG_SUCCESS = "SCREENSHAREDONTLOG_SUCCESS"
+    SCREENSHAREDONTLOG_ERROR = "SCREENSHAREDONTLOG_ERROR"
     
     
-    PING = "ping"
-    PONG = "pong"
+    PING = "PING"
+    PONG = "PONG"
     
     
-    QUEUE_JOIN_SUCCESS = "queue_join_success"
-    QUEUE_JOIN_ERROR = "queue_join_error"
+    QUEUE_JOIN_SUCCESS = "QUEUE_JOIN_SUCCESS"
+    QUEUE_JOIN_ERROR = "QUEUE_JOIN_ERROR"
 
 
 class MessageSchemas:
@@ -54,7 +54,7 @@ class MessageSchemas:
     WARP_PLAYERS = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.WARP_PLAYERS},
+            "type": {"type": "string", "const": "WARP_PLAYERS"},
             "game_id": {"type": "string"},
             "map": {"type": "string"},
             "is_ranked": {"type": "boolean"},
@@ -63,10 +63,9 @@ class MessageSchemas:
                 "items": {
                     "type": "object",
                     "properties": {
-                        "ign": {"type": "string"},
-                        "uuid": {"type": "string"}
+                        "ign": {"type": "string"}
                     },
-                    "required": ["ign", "uuid"]
+                    "required": ["ign"]
                 }
             },
             "team2": {
@@ -74,10 +73,9 @@ class MessageSchemas:
                 "items": {
                     "type": "object",
                     "properties": {
-                        "ign": {"type": "string"},
-                        "uuid": {"type": "string"}
+                        "ign": {"type": "string"}
                     },
-                    "required": ["ign", "uuid"]
+                    "required": ["ign"]
                 }
             }
         },
@@ -87,7 +85,7 @@ class MessageSchemas:
     SCORING = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.SCORING},
+            "type": {"type": "string", "const": "SCORING"},
             "gameid": {"type": "string"},
             "winningTeamNumber": {"type": "integer", "minimum": 1, "maximum": 2},
             "mvps": {
@@ -126,7 +124,7 @@ class MessageSchemas:
     CHECK_PLAYER = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.CHECK_PLAYER},
+            "type": {"type": "string", "const": "CHECK_PLAYER"},
             "ign": {"type": "string"},
             "request_id": {"type": "string"}
         },
@@ -136,7 +134,7 @@ class MessageSchemas:
     PLAYER_STATUS = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.PLAYER_STATUS},
+            "type": {"type": "string", "const": "PLAYER_STATUS"},
             "ign": {"type": "string"},
             "online": {"type": "boolean"},
             "request_id": {"type": "string"}
@@ -147,7 +145,7 @@ class MessageSchemas:
     QUEUE_FROM_INGAME = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.QUEUE_FROM_INGAME},
+            "type": {"type": "string", "const": "QUEUEFROMINGAME"},
             "ign": {"type": "string"},
             "queue_type": {"type": "string"}
         },
@@ -157,7 +155,7 @@ class MessageSchemas:
     PING = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.PING}
+            "type": {"type": "string", "const": "PING"}
         },
         "required": ["type"]
     }
@@ -165,7 +163,7 @@ class MessageSchemas:
     PONG = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.PONG}
+            "type": {"type": "string", "const": "PONG"}
         },
         "required": ["type"]
     }
@@ -173,7 +171,7 @@ class MessageSchemas:
     VOIDING = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.VOIDING},
+            "type": {"type": "string", "const": "VOIDING"},
             "gameid": {"type": "string"},
             "reason": {"type": "string"}
         },
@@ -183,7 +181,7 @@ class MessageSchemas:
     CALL_CMD = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.CALL_CMD},
+            "type": {"type": "string", "const": "CALL_CMD"},
             "requester_ign": {"type": "string"},
             "target_ign": {"type": "string"}
         },
@@ -193,7 +191,7 @@ class MessageSchemas:
     CALL_SUCCESS = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.CALL_SUCCESS},
+            "type": {"type": "string", "const": "CALL_SUCCESS"},
             "requester_ign": {"type": "string"},
             "target_ign": {"type": "string"}
         },
@@ -203,7 +201,7 @@ class MessageSchemas:
     CALL_FAILURE = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.CALL_FAILURE},
+            "type": {"type": "string", "const": "CALL_FAILURE"},
             "requester_ign": {"type": "string"},
             "target_ign": {"type": "string"},
             "reason": {"type": "string"}
@@ -214,7 +212,7 @@ class MessageSchemas:
     AUTO_SS = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.AUTO_SS},
+            "type": {"type": "string", "const": "AUTOSS"},
             "target_ign": {"type": "string"},
             "requester_ign": {"type": "string"}
         },
@@ -224,7 +222,7 @@ class MessageSchemas:
     SCREENSHARE_DONTLOG = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.SCREENSHARE_DONTLOG},
+            "type": {"type": "string", "const": "SCREENSHAREDONTLOG"},
             "target_ign": {"type": "string"},
             "enabled": {"type": "boolean"}
         },
@@ -234,16 +232,17 @@ class MessageSchemas:
     WARP_SUCCESS = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.WARP_SUCCESS},
-            "game_id": {"type": "string"}
+            "type": {"type": "string", "const": "WARP_SUCCESS"},
+            "game_id": {"type": "string"},
+            "map": {"type": "string"}
         },
-        "required": ["type", "game_id"]
+        "required": ["type", "game_id", "map"]
     }
     
     WARP_FAILED_ARENA = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.WARP_FAILED_ARENA},
+            "type": {"type": "string", "const": "WARP_FAILED_ARENA_NOT_FOUND"},
             "game_id": {"type": "string"},
             "map": {"type": "string"}
         },
@@ -253,7 +252,7 @@ class MessageSchemas:
     WARP_FAILED_OFFLINE = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.WARP_FAILED_OFFLINE},
+            "type": {"type": "string", "const": "WARP_FAILED_OFFLINE_PLAYERS"},
             "game_id": {"type": "string"},
             "offline_players": {
                 "type": "array",
@@ -266,7 +265,7 @@ class MessageSchemas:
     RETRY_GAME = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.RETRY_GAME},
+            "type": {"type": "string", "const": "RETRYGAME"},
             "game_id": {"type": "string"}
         },
         "required": ["type", "game_id"]
@@ -276,7 +275,7 @@ class MessageSchemas:
     AUTO_RETRY_FROM_INGAME = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.AUTO_RETRY_FROM_INGAME},
+            "type": {"type": "string", "const": "AUTORETRYGAMEFROMINGAME"},
             "game_id": {"type": "string"},
             "gameid": {"type": "string"}
         },
@@ -289,7 +288,7 @@ class MessageSchemas:
     QUEUE_STATUS = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.QUEUE_STATUS},
+            "type": {"type": "string", "const": "QUEUESTATUS"},
             "queues": {
                 "type": "object",
                 "patternProperties": {
@@ -321,7 +320,7 @@ class MessageSchemas:
     VERIFICATION = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": MessageType.VERIFICATION},
+            "type": {"type": "string", "const": "VERIFICATION"},
             "ign": {"type": "string"},
             "discord_id": {"type": "string"},
             "verified": {"type": "boolean"}
@@ -332,7 +331,7 @@ class MessageSchemas:
     QUEUE_JOIN_SUCCESS = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": "queue_join_success"},
+            "type": {"type": "string", "const": "QUEUE_JOIN_SUCCESS"},
             "ign": {"type": "string"},
             "queue_type": {"type": "string"},
             "channel_id": {"type": "string"},
@@ -344,7 +343,7 @@ class MessageSchemas:
     QUEUE_JOIN_ERROR = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": "queue_join_error"},
+            "type": {"type": "string", "const": "QUEUE_JOIN_ERROR"},
             "error": {"type": "string"}
         },
         "required": ["type", "error"]
@@ -353,7 +352,7 @@ class MessageSchemas:
     AUTOSS_SUCCESS = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": "autoss_success"},
+            "type": {"type": "string", "const": "AUTOSS_SUCCESS"},
             "target_ign": {"type": "string"},
             "requester_ign": {"type": "string"},
             "screenshare_id": {"type": "string"},
@@ -365,7 +364,7 @@ class MessageSchemas:
     AUTOSS_ERROR = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": "autoss_error"},
+            "type": {"type": "string", "const": "AUTOSS_ERROR"},
             "error": {"type": "string"},
             "target_ign": {"type": "string"},
             "requester_ign": {"type": "string"}
@@ -376,7 +375,7 @@ class MessageSchemas:
     SCREENSHAREDONTLOG_SUCCESS = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": "screensharedontlog_success"},
+            "type": {"type": "string", "const": "SCREENSHAREDONTLOG_SUCCESS"},
             "target_ign": {"type": "string"},
             "enabled": {"type": "boolean"},
             "message": {"type": "string"}
@@ -387,7 +386,7 @@ class MessageSchemas:
     SCREENSHAREDONTLOG_ERROR = {
         "type": "object",
         "properties": {
-            "type": {"type": "string", "const": "screensharedontlog_error"},
+            "type": {"type": "string", "const": "SCREENSHAREDONTLOG_ERROR"},
             "error": {"type": "string"},
             "target_ign": {"type": "string"}
         },
@@ -548,10 +547,11 @@ class MessageBuilder:
         }
     
     @staticmethod
-    def build_warp_success(game_id: str) -> Dict[str, Any]:
+    def build_warp_success(game_id: str, map_name: str = None) -> Dict[str, Any]:
         return {
             "type": MessageType.WARP_SUCCESS,
-            "game_id": game_id
+            "game_id": game_id,
+            "map": map_name or "unknown"
         }
     
     @staticmethod

@@ -204,7 +204,7 @@ class WebSocketManager:
         except Exception as e:
             self.logger.debug(f"Could not determine client address: {e}")
         
-        self.logger.info(f"New WebSocket connection from {client_address}")
+        self.logger.info(f"New WebSocket CLIENT CONNECTED from {client_address}")
         
         
         self.error_handler.track_connection_attempt(success=True)
@@ -226,7 +226,7 @@ class WebSocketManager:
                 await self.handle_message(websocket, message)
                 
         except websockets.exceptions.ConnectionClosed as e:
-            self.logger.info(f"WebSocket connection closed: {client_address} (code: {e.code}, reason: {e.reason})")
+            self.logger.info(f"🔌 WebSocket CLIENT DISCONNECTED: {client_address} (code: {e.code}, reason: {e.reason})")
             
             self.error_handler.connection_health['disconnections'] += 1
         except websockets.exceptions.WebSocketException as e:
@@ -238,7 +238,7 @@ class WebSocketManager:
         finally:
             
             self.clients.discard(websocket)
-            self.logger.info(f"Removed client {client_address} from active connections")
+            self.logger.info(f"🔌 WebSocket CLIENT CLEANUP: Removed {client_address} from active connections (Total clients: {len(self.clients)})")
     
     async def handle_message(self, websocket: WebSocketServerProtocol, data: str) -> None:
         if not self.enabled:
@@ -574,8 +574,8 @@ class WebSocketManager:
             self.screenshare_handler = ScreenshareHandler(self)
             
             
-            self.register_handler("autoss", self.screenshare_handler.handle_auto_ss)
-            self.register_handler("screensharedontlog", self.screenshare_handler.handle_screenshare_dontlog)
+            self.register_handler("AUTOSS", self.screenshare_handler.handle_auto_ss)
+            self.register_handler("SCREENSHAREDONTLOG", self.screenshare_handler.handle_screenshare_dontlog)
             
             self.logger.info("ScreenshareHandler initialized successfully")
             

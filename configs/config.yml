@@ -1,5 +1,5 @@
 bot:
-  bottoken: MTMzNjY3NDU5NzU3OTUyMjEzMQ.GrtHdI.5y93elBexrEnHi3dUMGLXCTAOhkg9xsCImrM_Q
+  bottoken: aaaaaaaaaaa
   guildid: '1388594405581131918'
   prefix: '='
 
@@ -63,9 +63,9 @@ websocket:
 workers:
   enabled: true
   tokens:
-    - 'MTQwMDUwNzkyMjU0MjQ5MzgyNg.GhXnUT.Cdlve8cS8Umb-lsWaFcutlsy-mOhCuVJCoEI5c'
-    - 'MTQwMDUwODE3MDM3OTU5MTgyMQ.G6NZke.76SZ8GC-x6gdcqeRYoeMar293xzlffvnMlBdqE'
-    - 'MTQwMDUwODI4OTM4NDcxNDQwMw.Gs9-uG.KPFGHQswMLbK-gYpPMPxxD6XXO5ttiPxDtK60o'
+    - 'aaaaaaaaaa'
+    - 'aaaaaaaaaa'
+    - 'aaaaaaaaaa'
 
 roles:
   frozen: 1388597541855301734

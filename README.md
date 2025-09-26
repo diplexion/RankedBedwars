@@ -2,7 +2,6 @@ ranked bedwars discord bot
 to make this work with ingame (bedwars1058) use this https://github.com/deyoyk/rbw-hook-public
 
 
-at the moment the websocket stuff wont work since it was work in progress, but it will be eventually completed. the discord-only bot works. 
 
 contact loqkey on discord for more info (its deyo)
 

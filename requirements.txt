@@ -14,3 +14,8 @@ matplotlib
 mplcyberpunk
 websockets
 jsonschema
+fastapi
+uvicorn
+graphene
+strawberry-graphql
+aiohttp

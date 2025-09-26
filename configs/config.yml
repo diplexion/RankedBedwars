@@ -60,6 +60,12 @@ websocket:
   max_retry_attempts: 3           # Maximum warp retry attempts
   queue_broadcast_interval: 1.0   # Queue status broadcast interval
 
+api:
+  enabled: true                   # Enable/disable API system
+  host: '0.0.0.0'                 # Host to bind to (same as WebSocket)
+  port: 25513                     # Port to bind to (same as WebSocket)
+  path: '/rbw/api'                # API base path
+
 workers:
   enabled: true
   tokens:

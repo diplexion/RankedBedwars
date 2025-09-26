@@ -1,12 +1,13 @@
 import asyncio
 import json
 import logging
-import websockets
 from typing import Set, Dict, Any, Optional, Callable
-from websockets.server import WebSocketServerProtocol
+from aiohttp import web, WSMsgType
+from aiohttp.web import Request, Response
 from .websocket.utils.error_handler import WebSocketErrorHandler, MessageValidationError, HandlerNotFoundError
 from .websocket.utils.callbacks import CallbackManager, RequestResponseHandler
 from .websocket.handlers.player_handler import PlayerHandler
+from .api_manager import APIManager
 
 
 class WebSocketManager:
@@ -27,7 +28,7 @@ class WebSocketManager:
         self.queue_broadcast_interval = websocket_config.get('queue_broadcast_interval', 1.0)
         
         
-        self.clients: Set[WebSocketServerProtocol] = set()
+        self.clients: Set[web.WebSocketResponse] = set()
         self.server = None
         
         
@@ -61,6 +62,9 @@ class WebSocketManager:
         self.scoring_handler = None
         self.voice_handler = None
         self.screenshare_handler = None
+        
+        self.api_manager = APIManager(bot, config)
+        
         if self.enabled:
             self._initialize_handlers()
         
@@ -74,58 +78,77 @@ class WebSocketManager:
             return
         
         try:
-            self.logger.info(f"Starting WebSocket server on {self.host}:{self.port}")
+            self.logger.info(f"Starting combined WebSocket and API server on {self.host}:{self.port}")
             self.start_time = asyncio.get_event_loop().time()
             
+            self.app = web.Application()
             
-            async def connection_handler(websocket):
+            if self.api_manager.is_enabled():
+                self.api_manager.create_routes(self.app)
+                self.logger.info("API routes registered")
+            
+            async def websocket_handler(request):
+                ws = web.WebSocketResponse()
+                await ws.prepare(request)
                 
-                path = getattr(websocket, 'path', self.path)
-                await self.handle_connection(websocket, path)
+                self.clients.add(ws)
+                self.logger.info(f"WebSocket client connected from {request.remote}")
+                
+                try:
+                    async for msg in ws:
+                        if msg.type == WSMsgType.TEXT:
+                            await self.handle_message(ws, msg.data)
+                        elif msg.type == WSMsgType.ERROR:
+                            self.logger.error(f"WebSocket error: {ws.exception()}")
+                except Exception as e:
+                    self.logger.error(f"WebSocket handler error: {e}")
+                finally:
+                    self.clients.discard(ws)
+                    self.logger.info(f"WebSocket client disconnected")
+                
+                return ws
             
-            
-            self.server = await websockets.serve(
-                connection_handler,
-                self.host,
-                self.port,
-                logger=self.logger,
-                ping_interval=30,  
-                ping_timeout=10,   
-                close_timeout=10   
-            )
-            
+            self.app.router.add_get(self.path, websocket_handler)
             
             await self.callback_manager.start()
-            
             
             self._connection_health_task = asyncio.create_task(self._monitor_connection_health())
             self._background_tasks.add(self._connection_health_task)
             
-            
             if self.queue_handler:
                 await self.queue_handler.start_broadcasting()
             
-            self.logger.info(f"WebSocket server started successfully on ws://{self.host}:{self.port}{self.path}")
+            self.runner = web.AppRunner(self.app)
+            await self.runner.setup()
+            self.site = web.TCPSite(self.runner, self.host, self.port)
+            await self.site.start()
+            
+            self.logger.info(f"Combined server started successfully on {self.host}:{self.port}")
+            self.logger.info(f"WebSocket: ws://{self.host}:{self.port}{self.path}")
+            self.logger.info(f"API: http://{self.host}:{self.port}/rbw/api")
             
         except Exception as e:
             await self.error_handler.handle_connection_error(None, e)
-            await self.error_handler.handle_critical_error("WebSocket Server Startup", e, should_shutdown=True)
-            self.logger.error(f"Failed to start WebSocket server: {e}")
+            await self.error_handler.handle_critical_error("Combined Server Startup", e, should_shutdown=True)
+            self.logger.error(f"Failed to start combined server: {e}")
             raise
     
     async def stop(self) -> None:
-        if not self.enabled or not self.server:
+        if not self.enabled:
             return
         
         try:
-            self.logger.info("Stopping WebSocket server...")
+            self.logger.info("Stopping combined server...")
             
+            if hasattr(self, 'site') and self.site:
+                await self.site.stop()
+            if hasattr(self, 'runner') and self.runner:
+                await self.runner.cleanup()
             
             try:
                 await self.callback_manager.stop()
             except Exception as e:
                 await self.error_handler.handle_shutdown_error("Callback Manager", e)
-            
             
             if self.queue_handler:
                 try:
@@ -187,7 +210,7 @@ class WebSocketManager:
             await self.error_handler.handle_shutdown_error("WebSocket Manager Stop", e)
             self.logger.error(f"Error stopping WebSocket server: {e}")
     
-    async def handle_connection(self, websocket: WebSocketServerProtocol, path: str) -> None:
+    async def handle_connection(self, websocket, path: str) -> None:
         if not self.enabled:
             await websocket.close(code=1000, reason="WebSocket system disabled")
             return
@@ -225,22 +248,18 @@ class WebSocketManager:
             async for message in websocket:
                 await self.handle_message(websocket, message)
                 
-        except websockets.exceptions.ConnectionClosed as e:
-            self.logger.info(f"🔌 WebSocket CLIENT DISCONNECTED: {client_address} (code: {e.code}, reason: {e.reason})")
+        except Exception as e:
+            self.logger.info(f" WebSocket CLIENT DISCONNECTED: {client_address} (error: {e})")
             
             self.error_handler.connection_health['disconnections'] += 1
-        except websockets.exceptions.WebSocketException as e:
-            self.error_handler.track_connection_attempt(success=False)
-            await self.error_handler.handle_connection_error(websocket, e)
-        except Exception as e:
             self.error_handler.track_connection_attempt(success=False)
             await self.error_handler.handle_connection_error(websocket, e)
         finally:
             
             self.clients.discard(websocket)
-            self.logger.info(f"🔌 WebSocket CLIENT CLEANUP: Removed {client_address} from active connections (Total clients: {len(self.clients)})")
+            self.logger.info(f" WebSocket CLIENT CLEANUP: Removed {client_address} from active connections (Total clients: {len(self.clients)})")
     
-    async def handle_message(self, websocket: WebSocketServerProtocol, data: str) -> None:
+    async def handle_message(self, websocket, data: str) -> None:
         if not self.enabled:
             return
         
@@ -325,26 +344,23 @@ class WebSocketManager:
         except Exception as e:
             self.error_handler.log_error("BROADCAST", f"Error broadcasting message: {e}", e)
     
-    async def send_to_client(self, websocket: WebSocketServerProtocol, message: dict) -> None:
+    async def send_to_client(self, websocket, message: dict) -> None:
         if not self.enabled:
             return
         
         try:
             message_json = json.dumps(message)
-            await websocket.send(message_json)
+            await websocket.send_str(message_json)
             self.logger.debug(f"Sent message to client: {message.get('type', 'unknown')}")
             
-        except websockets.exceptions.ConnectionClosed:
-            self.logger.debug("Attempted to send message to closed connection")
-            self.clients.discard(websocket)
         except Exception as e:
+            self.logger.debug(f"Attempted to send message to closed connection: {e}")
+            self.clients.discard(websocket)
             self.error_handler.log_error("SEND_CLIENT", f"Error sending message to client: {e}", e)
     
-    async def _send_to_client_safe(self, websocket: WebSocketServerProtocol, message_json: str) -> None:
+    async def _send_to_client_safe(self, websocket, message_json: str) -> None:
         try:
-            await websocket.send(message_json)
-        except websockets.exceptions.ConnectionClosed:
-            raise  
+            await websocket.send_str(message_json)
         except Exception as e:
             self.logger.debug(f"Error in safe send to client: {e}")
             raise
@@ -392,7 +408,7 @@ class WebSocketManager:
         
         return status
     
-    async def _handle_ping(self, websocket: WebSocketServerProtocol, message: dict) -> None:
+    async def _handle_ping(self, websocket, message: dict) -> None:
         try:
             pong_message = {
                 "type": "pong",
@@ -409,7 +425,7 @@ class WebSocketManager:
         except Exception as e:
             self.error_handler.log_error("PING_HANDLER", f"Error handling ping: {e}", e)
     
-    async def _handle_pong(self, websocket: WebSocketServerProtocol, message: dict) -> None:
+    async def _handle_pong(self, websocket, message: dict) -> None:
         try:
             self.logger.debug("Received pong from client")
             

@@ -112,12 +112,16 @@ def make_games_graph(db_manager, state, interval, bot):
         if idx < 0 or idx > interval:
             continue
         state_val = game.get("state", "unknown").lower()
-        if state_val == "scored":
-            scored_counts[idx] += 1
-        elif state_val == "voided":
-            voided_counts[idx] += 1
-        elif state_val == "pending":
-            pending_counts[idx] += 1
+
+        match state_val:
+            case "scored":
+                scored_counts[idx] += 1
+            case "voided":
+                voided_counts[idx] += 1
+            case "pending":
+                pending_counts[idx] += 1
+            case _:
+                pass
 
     if state != "all":
         match state:
